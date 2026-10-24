@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="es-AR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MISÚ | Encontrá tu talle</title>
+<style>
+:root{--wine:#640017;--olive:#5A5E27;--ink:#2F1B1A;--cream:#EFEFC9;--line:#dedbd4}
+*{box-sizing:border-box}body{margin:0;background:#f7f6f2;color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:640px;margin:24px auto;padding:0 14px}.panel{background:#fff;border:1px solid #e6e1da;border-radius:22px;box-shadow:0 8px 28px #3320140a;padding:clamp(20px,5vw,36px)}
+.brand{text-align:center;color:var(--wine);font:normal 56px/1.15 Georgia,serif;letter-spacing:.025em}
+.eyebrow{text-align:center;color:var(--olive);font-size:11px;letter-spacing:.25em;font-weight:700}
+h1{text-align:center;font:normal 27px Georgia,serif;margin:13px 0 8px}
+.intro{color:#625e5a;text-align:center;margin:0 0 26px}label{display:block;font-weight:650;margin:18px 0 8px}
+input,select{display:block;width:100%;font:inherit;padding:15px 14px;border:1px solid #cbc9c5;border-radius:11px;background:#fff;color:var(--ink)}
+input:focus,select:focus{outline:2px solid #9c6a79;outline-offset:1px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.grid label{margin-top:14px}
+.hint{color:#77716d;font-size:13px;margin:7px 0 0}
+button{width:100%;margin-top:26px;padding:17px;border:0;border-radius:11px;background:var(--wine);color:#fff;font-weight:700;font-size:16px;cursor:pointer}
+.result{display:none;margin-top:23px;background:#f9f6f1;border-left:4px solid var(--olive);padding:20px;border-radius:9px}
+.result h2{margin:0 0 8px;font:normal 23px Georgia,serif;color:var(--wine)}
+.result p{margin:8px 0}.tag{font-size:13px;color:var(--olive);font-weight:700;letter-spacing:.08em}
+hr{border:0;border-top:1px solid var(--line);margin:28px 0 18px}
+footer{color:#5c5854;font-size:13.5px}a{color:var(--wine);font-weight:700}
+.hidden{display:none!important}.note{font-size:13px;color:#716b65;margin-top:14px}
+@media(max-width:430px){.grid{grid-template-columns:1fr}.brand{font-size:48px}h1{font-size:24px}}
+</style></head><body><main><section class="panel">
+<div class="brand">MISÚ</div><div class="eyebrow">MOVETE A TU MANERA</div>
+<h1>Encontrá tu talle</h1>
+<p class="intro">Contanos qué prenda buscás y algunas medidas tuyas. Te damos una <b>orientación inicial</b> para elegir.</p>
+<form id="form">
+<label for="cat">¿Qué estás buscando?</label>
+<select id="cat"><option value="short">Calza corta</option><option value="long">Calza larga</option><option value="top">Top deportivo</option></select>
+<div id="bottomFields">
+<label for="pants">¿Qué talle de pantalón usás habitualmente?</label>
+<select id="pants"><option value="">Seleccioná una opción</option><option>36</option><option>38</option><option>40</option><option>42</option><option>44</option><option value="other">Otro / no estoy segura</option></select>
+<div class="grid"><div><label for="waist">Cintura (cm)</label><input id="waist" type="number" min="40" max="180" step=".5" inputmode="decimal" placeholder="Ej. 72"></div>
+<div><label for="hips">Cadera (cm)</label><input id="hips" type="number" min="55" max="200" step=".5" inputmode="decimal" placeholder="Ej. 98"></div></div>
+<p class="hint">Medí alrededor de tu cintura natural y de la parte más ancha de la cadera. No midas la prenda.</p>
+<label for="height">Altura (cm) <span style="font-weight:400">(opcional)</span></label>
+<input id="height" type="number" min="120" max="220" step="1" inputmode="numeric" placeholder="Ej. 165">
+<p class="hint">La altura nos ayuda a darte una observación sobre el largo, no a determinar el talle de cintura.</p>
+</div>
+<div id="topFields" class="hidden">
+<label for="bra">¿Qué talle de corpiño usás habitualmente?</label>
+<select id="bra"><option value="">Seleccioná una opción</option><option>85</option><option>90</option><option>95</option><option>100</option><option>105</option><option>110</option><option value="other">Otro / no estoy segura</option></select>
+<label for="bust">Contorno de busto (cm) <span style="font-weight:400">(opcional)</span></label>
+<input id="bust" type="number" min="55" max="170" step=".5" inputmode="decimal" placeholder="Ej. 94">
+<p class="hint">Medí alrededor de la parte más prominente del busto, sin ajustar la cinta. El talle de corpiño es solo orientativo: también influye la copa.</p>
+</div>
+<button id="calculate" type="button">Ver mi orientación de talle</button></form>
+<div id="result" class="result" role="status" aria-live="polite"></div>
+<hr>
+<footer><b>Importante:</b> cada modelo puede tener distinta elasticidad, compresión y corte. La recomendación es orientativa y puede variar según tus preferencias de ajuste. Si tenés dudas, escribinos y te ayudamos. <a href="https://misustore.com.ar/" target="_blank" rel="noopener">Ir a la tienda MISÚ →</a></footer>
+</section></main>
+<script>
+const cat=document.getElementById('cat'), bottom=document.getElementById('bottomFields'), topf=document.getElementById('topFields'),result=document.getElementById('result');
+cat.addEventListener('change',()=>{const t=cat.value==='top';bottom.classList.toggle('hidden',t);topf.classList.toggle('hidden',!t);result.style.display='none'});
+const sizes=['S','M','L','XL'];
+function byThreshold(v,thresholds){return thresholds.findIndex(n=>v<=n)===-1?3:thresholds.findIndex(n=>v<=n)}
+function readNum(id){let v=document.getElementById(id).value;return v===''?null:Number(v)}
+document.getElementById('calculate').addEventListener('click',()=>{
+ let idx=[],comments=[],kind=cat.value;
+ if(kind==='top'){
+  let bra=document.getElementById('bra').value,bust=readNum('bust');
+  if(bra && bra!=='other'){idx.push(byThreshold(+bra,[90,95,100]));}
+  if(bust!==null){if(bust<55||bust>170)return showError('Revisá el contorno de busto ingresado.');idx.push(byThreshold(bust,[90,96,103]));}
+  if(!idx.length)return showError('Ingresá tu talle de corpiño o el contorno de busto para orientarte.');
+  comments.push('El talle de corpiño por sí solo no contempla la copa ni el nivel de sujeción del top.');
+ }else{
+  let pants=document.getElementById('pants').value,w=readNum('waist'),h=readNum('hips'),height=readNum('height');
+  if(pants&&pants!=='other'){idx.push(byThreshold(+pants,[38,40,42]));}
+  if(w!==null){if(w<40||w>180)return showError('Revisá la medida de cintura ingresada.');idx.push(byThreshold(w,[70,78,86]));}
+  if(h!==null){if(h<55||h>200)return showError('Revisá la medida de cadera ingresada.');idx.push(byThreshold(h,[96,104,112]));}
+  if(height!==null&&(height<120||height>220))return showError('Revisá la altura ingresada.');
+  if(!idx.length)return showError('Ingresá tu talle de pantalón, cintura o cadera para orientarte.');
+  if(kind==='long'&&height!==null)comments.push('Tu altura sirve para considerar el largo de la calza, pero no determina el talle.');
+  comments.push('Las equivalencias de pantalón y los rangos corporales son aproximaciones iniciales, no medidas de calce verificadas en todos los modelos.');
+ }
+ const lo=Math.min(...idx),hi=Math.max(...idx);
+ let recommendation=(hi-lo>=2)?`Tus medidas no coinciden lo suficiente para recomendarte un talle con seguridad.`:(hi===lo?`Te recomendamos el talle <strong>${sizes[hi]}</strong>.`:`Te recomendamos <strong>${sizes[lo]} o ${sizes[hi]}</strong>.`);
+ let message=hi-lo>=2?'Revisá las medidas que ingresaste o escribinos para que te ayudemos a elegir.':'Si estás entre dos talles consecutivos, el ajuste que prefieras puede cambiar la elección.';
+ result.innerHTML=`<div class="tag">ORIENTACIÓN MISÚ</div><h2>${recommendation}</h2><p>${message}</p><p>${comments.join(' ')}</p><p class="note">Esta recomendación es orientativa. El calce puede variar según el modelo, la elasticidad de la tela y cómo prefieras usar la prenda. 🤎</p>`;
+ result.style.display='block';result.scrollIntoView({behavior:'smooth',block:'nearest'});
+});
+function showError(s){result.innerHTML='<div class="tag">REVISÁ TUS DATOS</div><p>'+s+'</p>';result.style.display='block';result.scrollIntoView({behavior:'smooth',block:'nearest'});}
+document.getElementById('form').addEventListener('submit',function(e){e.preventDefault();document.getElementById('calculate').click();});
+</script></body></html>
